@@ -12,10 +12,10 @@
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand"><div class="brand-logo">U<span>EV</span></div><div class="brand-divider"></div><div><strong>Energy & Mobility Explorer</strong><small>GEOSPATIAL PLANNING PLATFORM / VERSION 0.5</small></div></div>
+    <div class="brand"><div class="brand-logo">U<span>EV</span></div><div class="brand-divider"></div><div><strong>Energy & Mobility Explorer</strong><small>GEOSPATIAL PLANNING PLATFORM / VERSION 0.6</small></div></div>
     <div class="topbar-right"><span class="label-pill"><span class="pulse"></span> Layers + Scenarios Prototype</span><a href="/docs" target="_blank" rel="noopener">API docs ↗</a></div>
   </header>
-  <div class="notice"><span class="notice-dot">!</span><b>DATA SOURCES VARY</b><span> Public OpenStreetMap/WorldPop overlays coexist with explicitly synthetic UEV modelling inputs. Public layers do not yet calibrate the scenario engine.</span></div>
+  <div class="notice"><span class="notice-dot">!</span><b>DATA SOURCES VARY</b><span> Public OpenStreetMap/WorldPop overlays coexist with explicitly synthetic UEV modelling inputs. Public layers and administrator-published GIS data do not yet calibrate the scenario engine.</span></div>
   <main class="workspace">
     <aside class="sidebar">
       <div class="sidebar-scroll">
@@ -29,16 +29,17 @@
         <label for="layer-search">Find a layer</label>
         <input type="search" id="layer-search" placeholder="Population, roads, grid, charging…" class="layer-search"/>
         <div id="layer-catalog" class="layer-catalog"><p class="input-note">Loading dataset catalogue…</p></div>
+        <button type="button" class="secondary-action" id="reload-catalog">↻ Check for published layers</button>
         <button type="button" class="secondary-action" id="refresh-layers">↻ Refresh public layers in current map view</button>
         <p class="input-note" id="layer-status" role="status">Zoom in to a district or town, then enable an OpenStreetMap layer.</p>
         <section class="form-section">
           <div class="section-label">ADD YOUR OWN LAYER</div>
           <label for="custom-geojson">GeoJSON (Point / Line / Polygon)</label>
           <input type="file" id="custom-geojson" accept=".geojson,.json,application/geo+json,application/json"/>
-          <p class="input-note">Loaded only in this browser tab; not uploaded or used in modelling. Use only files you have permission to disclose.</p>
+          <p class="input-note">Temporary personal preview only. To publish a reusable layer, use the separate administrator Data Manager. Use only files you have permission to disclose.</p>
           <div id="custom-list"></div>
         </section>
-        <div class="source-footnote">OpenStreetMap (© contributors, ODbL) is incomplete, particularly for distribution assets. WorldPop raster is historical. UEV demo features are fictional. <b>Map overlays do not automatically change optimization inputs.</b></div>
+        <div class="source-footnote">Administrator-published layers may contain unverified user-provided information. OpenStreetMap (© contributors, ODbL) is incomplete, particularly for distribution assets. WorldPop raster is historical. UEV demo features are fictional. <b>Map overlays do not automatically change optimization inputs.</b></div>
       </div>
       <div class="sidebar-view" id="view-scenarios" hidden>
       <section class="side-head"><span class="eyebrow">01 / EXPLORE</span><h1>Explore mobility.<br/><em>Plan intelligently.</em></h1><p>Inspect transport activity, charging infrastructure and candidate locations, then test illustrative fleet, charging-demand and station-location scenarios.</p></section>

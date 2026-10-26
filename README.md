@@ -10,15 +10,24 @@ UEV is an open-source geospatial and techno-economic planning project for Uganda
 4. Where should charging and battery-swapping infrastructure be deployed?
 5. What investments and timelines are required for user-defined electrification targets, up to 100%?
 
-## Current development release — Phase 5 layered GIS prototype
+## Current development release — Phase 6 dual-interface GIS data management
 
 - **Phase 1:** baseline fleet and charging energy calculator and simplified charging CAPEX comparisons.
 - **Phase 2:** SQLite spatial inventory, source catalogue, GeoJSON, FastAPI, MapLibre explorer and district filters.
 - **Phase 3:** capacitated station location-allocation (candidate-site CAPEX, maximum service coverage for a budget, user-defined site portfolios).
 - **Phase 4:** integrated scenario workflow joining year-specific fleet energy demand to candidate-site allocation, interactive selected-site and link map overlays, annual EV/energy trajectory and downloadable JSON.
-- **Phase 5:** GEP/EAE-inspired Layers / Scenarios tabs; searchable geospatial catalogue, OpenStreetMap road/power/substation layers (on-demand at city scale), WorldPop historical population overlay, local GeoJSON uploads, visible attribution/provenance.
+- **Phase 5:** GEP/EAE-inspired Layers / Scenarios tabs; searchable geospatial catalogue, OSM road/power layers, historical WorldPop population overlay and local GIS previews.
+- **Phase 6:** separate password-protected GIS Data Manager on port 8002 and public Planning Explorer on port 8001, sharing a SQLite data catalogue. Administrator uploads and previews licensed GeoJSON as PRIVATE drafts; explicitly publishing creates reusable toggleable layers on the public map. Model inputs remain unaltered until validated integration.
 
 **The built-in UEV demonstration asset coordinates, fleet sizes, grid labels and site scores are SYNTHETIC.** Public OpenStreetMap/WorldPop overlays are separate and not fed into optimization. This remains a software demonstration, NOT a Uganda EV census, an engineering-approved charging-location recommendation, a national least-cost investment pathway or a grid power-flow model. Full grid engineering, actual station sizing and lifecycle investment optimization are future milestones.
+
+## Private backend and public frontend
+
+**Two separate running web applications share one data store.** Only administrators may upload or publish layers. Public users can only explore published layers and run existing scenarios. See [Windows installation and workflows](docs/DUAL_INTERFACE_PHASE6.md) for exact commands and security cautions.
+
+- **Public Planning Explorer:** `python -m uvicorn uev.api:app --host 127.0.0.1 --port 8001 --reload` → http://127.0.0.1:8001
+- **Private Data Manager:** set `UEV_ADMIN_USER` and an independent `UEV_ADMIN_PASSWORD` (12+ characters) in another terminal; run `python -m uvicorn uev.admin_api:app --host 127.0.0.1 --port 8002 --reload` → http://127.0.0.1:8002
+- Both applications must read the same `UEV_DB_PATH` (they share the same default if unset). Only GeoJSON vector files are importable through the admin UI at present. Newly imported layers are private until published.
 
 ## Run the interactive GIS prototype
 

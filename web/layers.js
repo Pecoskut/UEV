@@ -24,20 +24,23 @@ function catalogRow(layer) {
   const row=node("div","catalog-layer");
   row.dataset.catalogRow=layer.id;
   const label=node("label","catalog-label");
-  const status=node("small","source-tag "+layer.status,layer.status==="synthetic"?"DEMO":layer.status==="public"?"PUBLIC":"SOURCE");
+  const status=node("small","source-tag "+layer.status,layer.status==="synthetic"?"DEMO":layer.status==="public"?"PUBLIC":layer.kind==="managed"?"UPLOADED":"SOURCE");
   const head=node("span","catalog-layer-heading",layer.name);
   const caption=node("small","catalog-layer-source",(layer.year?layer.year+" • ":"")+layer.source);
   const textBox=node("span","catalog-layer-text");
   textBox.append(head,caption);
-  if(layer.status==="public" || layer.status==="synthetic"){
+  if(layer.kind==="managed" || layer.status==="public" || layer.status==="synthetic"){
     const check=document.createElement("input");
     check.type="checkbox";
     check.dataset.layer=layer.id;
-    check.checked=Boolean(layer.default);
+    check.checked=Boolean(layer.default) || previouslyChecked.has(layer.id);
     check.setAttribute("aria-label","Display "+layer.name);
     check.addEventListener("change",async()=>{
       if(layer.kind==="demo") {
         applyMapLayers();updateLegend();
+      }else if(layer.kind==="managed") {
+        if(check.checked)await loadManagedLayer(layer);
+        else hidePublicLayer(layer.id);
       }else if(layer.kind==="osm") {
         if(check.checked) await refreshPublicLayer(layer.id);
         else hidePublicLayer(layer.id);
@@ -57,6 +60,7 @@ function catalogRow(layer) {
   row.append(label,node("div","layer-explanation",layer.description));
   return row;
 }
+let previouslyChecked=new Set();
 function renderCatalog() {
   const catalog=$("layer-catalog");
   catalog.replaceChildren();
@@ -118,6 +122,34 @@ function paintGeoJSON(id,fc,color) {
     new maplibregl.Popup({maxWidth:"320px"}).setLngLat(e.lngLat).setDOMContent(panel).addTo(map);
   };
   ["ln","pt","poly"].forEach(part=>map.on("click",id+"-"+part,popup));
+}
+async function loadManagedLayer(layer) {
+  const check=document.querySelector('[data-layer="'+layer.id+'"]');
+  if(!check?.checked)return;
+  try{
+    legendStatus("Loading published dataset: "+layer.name+"…");
+    const response=await api("/api/v1/managed/"+encodeURIComponent(layer.id));
+    if(!check.checked)return;
+    paintGeoJSON(layer.id,response,layer.color||"#24caca");
+    liveOverlays[layer.id]={count:response.features.length,source:layer.source};
+    legendStatus(layer.name+" • "+response.features.length+" uploaded features. Source: "+layer.source+"; unverified for engineering use.");
+    updateLegend();
+  }catch(error){
+    hidePublicLayer(layer.id);
+    legendStatus(layer.name+": "+error.message);
+  }
+}
+async function reloadPublishedCatalog(){
+  const checks=[...document.querySelectorAll("input[data-layer]:checked")].map(el=>el.dataset.layer);
+  previouslyChecked=new Set(checks);
+  try{
+    const response=await api("/api/v1/catalog");
+    publicCatalog=response.layers;
+    const available=new Set(publicCatalog.map(x=>x.id));
+    Object.keys(liveOverlays).filter(id=>!available.has(id)).forEach(id=>hidePublicLayer(id));
+    renderCatalog();
+    legendStatus("Layer catalogue refreshed. Newly published datasets are now available.");
+  }catch(error){legendStatus("Cannot refresh catalogue: "+error.message);}
 }
 async function refreshPublicLayer(id) {
   const checked=document.querySelector('[data-layer="'+id+'"]');
@@ -187,7 +219,7 @@ function updateLegend(){
   const active=publicCatalog.filter(x=>document.querySelector('[data-layer="'+x.id+'"]')?.checked);
   const messages=active.map(x=>{
     const v=liveOverlays[x.id];
-    return x.name+" ("+(x.status==="synthetic"?"DEMO":v?(v.count+" public features"):"not loaded")+")";
+    return x.name+" ("+(x.status==="synthetic"?"DEMO":v?(v.count+" features"):"not loaded")+")";
   });
   if(customOverlays.length)messages.push(customOverlays.length+" custom file(s)");
   legend.textContent=messages.length?"Visible selections: "+messages.join(" · "):"No layers selected";
@@ -233,6 +265,7 @@ async function initializeLayerExplorer(){
   setTab("layers");
   $("layer-search").addEventListener("input",filterCatalog);
   $("refresh-layers").addEventListener("click",refreshAllPublic);
+  $("reload-catalog").addEventListener("click",reloadPublishedCatalog);
   $("custom-geojson").addEventListener("change",e=>{
     const file=e.target.files?.[0];if(file)addCustomFile(file);
     e.target.value="";

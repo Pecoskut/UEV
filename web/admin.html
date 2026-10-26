@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>UEV | Private Data Manager</title>
+<link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/assets/admin.css"/>
+<script defer src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script defer src="/assets/admin.js"></script>
+</head>
+<body>
+<div class="shell">
+  <aside class="rail">
+    <div class="logo">U<span>EV</span> <small>ADMIN</small></div>
+    <p class="eyebrow">PRIVATE BACKEND</p>
+    <h1>Data<br/>Manager<span class="highlight">.</span></h1>
+    <p class="lede">Upload, inspect, organise and publish GIS layers. Your public Planning Explorer reads only datasets you choose to publish.</p>
+    <div class="steps"><div><b>01</b> Import GeoJSON</div><div><b>02</b> Review and preview</div><div><b>03</b> Publish for the explorer</div></div>
+    <div class="aside-note"><strong>Access control</strong><p>Admin credentials are required. Drafts are not exposed by the public API. Only upload information you have a right to publish.</p></div>
+  </aside>
+  <main>
+    <header class="header"><div><span class="eyebrow">UEV / VERSION 0.6</span><h2>Geospatial dataset administration</h2></div><div class="chip">● ADMINISTRATOR</div></header>
+    <div class="notice">Publishing makes the full uploaded GeoJSON—including all feature attributes—available to anyone with access to the public explorer. No validation of land access, electrical ratings, privacy, or dataset licences is implied.</div>
+    <div class="stats"><div><small>Stored datasets</small><strong id="count-all">—</strong></div><div><small>Published layers</small><strong id="count-published">—</strong></div><div><small>Unpublished drafts</small><strong id="count-drafts">—</strong></div></div>
+    <div class="columns">
+      <section class="panel">
+        <div class="panel-head"><div><span class="eyebrow">01 / INGEST</span><h3>Add a GIS layer</h3></div><span class="tag">GeoJSON / WGS84</span></div>
+        <form id="layer-form">
+          <div class="drop-zone"><label for="geojson-file">Choose a .geojson or .json file</label><input type="file" id="geojson-file" accept=".geojson,.json,application/geo+json,application/json" required/><p id="file-summary">Max 5 MB and 5,000 features. Coordinates must use longitude/latitude (EPSG:4326).</p></div>
+          <label for="layer-name">Display name <em>*</em></label><input id="layer-name" required maxlength="160" placeholder="Uganda 33 kV distribution lines"/>
+          <label for="layer-source">Data owner / source <em>*</em></label><input id="layer-source" required maxlength="160" placeholder="Utility / partner / open dataset"/>
+          <label for="layer-license">Licence / publication permission <em>*</em></label><input id="layer-license" required maxlength="160" placeholder="Open data licence or written permission"/>
+          <div class="split">
+            <div><label for="layer-category">Layer category</label><select id="layer-category">
+              <option>Electricity infrastructure</option><option>Transport &amp; accessibility</option><option>Population &amp; settlements</option><option>EV &amp; mobility</option><option>Boundaries &amp; environment</option><option>Other uploaded layers</option>
+            </select></div>
+            <div><label for="layer-year">Reference year</label><input type="number" min="1900" max="2200" id="layer-year" placeholder="2026"/></div>
+          </div>
+          <label for="layer-description">Dataset description</label><textarea id="layer-description" rows="3" maxlength="2000" placeholder="Coverage, update date, limitations and field definitions"></textarea>
+          <label for="layer-color">Layer colour</label><input type="color" id="layer-color" value="#2fc7c9"/>
+          <button class="primary" type="submit" id="upload-button">Import as private draft</button>
+          <p class="help">Importing never publishes automatically. Select a dataset from the library below to preview before publishing.</p>
+        </form>
+      </section>
+      <section class="panel panel-preview">
+        <div class="panel-head"><div><span class="eyebrow">02 / INSPECT</span><h3>Spatial preview</h3></div><span class="tag">MAP</span></div>
+        <div class="preview-map" id="admin-map"><div class="map-placeholder">Select a dataset to see its mapped features.</div></div>
+        <div class="preview-meta" id="preview-meta">Preview will show the selected dataset here. Basemap requires internet access.</div>
+        <p class="help">The map is visual reference only. Imported roads, population and electric-network layers are not yet used by the optimization solver.</p>
+      </section>
+    </div>
+    <section class="panel library">
+      <div class="panel-head"><div><span class="eyebrow">03 / PUBLISH</span><h3>Dataset library</h3></div><button type="button" id="refresh-list" class="secondary">Refresh datasets</button></div>
+      <div id="layer-list" class="dataset-list"><p class="help">Loading your GIS datasets…</p></div>
+    </section>
+    <footer>UEV Private Data Manager • Local trusted deployment • No real utility data should be published without explicit authorization.</footer>
+  </main>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+</body></html>
