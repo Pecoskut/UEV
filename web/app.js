@@ -92,7 +92,7 @@ function applyMapLayers() {
     const source = map.getSource("data-"+layer);
     if (source) source.setData(featureCollection);
     const toggle = document.querySelector(`[data-layer="${layer}"]`);
-    if (map.getLayer("points-"+layer)) map.setLayoutProperty("points-"+layer,"visibility",toggle.checked?"visible":"none");
+    if (map.getLayer("points-"+layer)) map.setLayoutProperty("points-"+layer,"visibility",(toggle ? toggle.checked : true)?"visible":"none");
   });
 }
 function updatePlanLayer(fc) {
