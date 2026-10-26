@@ -5,12 +5,13 @@ import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from . import geo
 from . import location
 from . import planning
+from . import open_layers
 from .model import Charger, Fleet, project
 
 WEB = geo.ROOT / "web"
@@ -26,7 +27,7 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
     with geo.connect(path) as conn:
         if seed_demo:
             geo.seed_demo(conn)
-    app = FastAPI(title="UEV Geospatial Explorer API", version="0.4.0",
+    app = FastAPI(title="UEV Geospatial Explorer API", version="0.5.0",
                   description="Exploratory GIS and demand previews with explicitly synthetic demonstration data")
     app.mount("/static", StaticFiles(directory=WEB), name="static")
 
@@ -39,7 +40,7 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
 
     @app.get("/api/v1/metadata")
     def metadata():
-        return {"version": "0.4.0", "data_status": "SYNTHETIC DEMONSTRATION ONLY",
+        return {"version": "0.5.0", "data_status": "SYNTHETIC DEMONSTRATION ONLY",
                 "baseline_year": 2026,
                 "layers": sorted(geo.LAYERS), "lenses": list(geo.WEIGHTS),
                 "disclaimer": "Coordinates and asset descriptions are invented. No station is verified, approved or grid-ready."}
@@ -142,6 +143,39 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
                     selected_site_ids=(selected_site_ids.split(",") if selected_site_ids else None))
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+    @app.get("/api/v1/catalog")
+    def layer_catalog():
+        """Platform data inventory with real/synthetic/unavailable states."""
+        return {"layers": open_layers.CATALOG,
+                "warning": "Public OSM layers are incomplete. Live overlays are NOT automatically inputs to the UEV optimization model."}
+
+    @app.get("/api/v1/public/osm/{layer}")
+    async def public_osm(layer: str, bbox: str):
+        try:
+            return await open_layers.load_osm(layer, bbox)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except Exception as exc:
+            import httpx
+            if isinstance(exc, (httpx.HTTPError, ValueError)):
+                raise HTTPException(status_code=503, detail="OpenStreetMap service unavailable. Try again after zooming in.") from exc
+            raise
+
+    @app.get("/api/v1/public/population.png")
+    async def worldpop_overlay(bbox: str):
+        try:
+            image = await open_layers.population_png(bbox)
+            return Response(content=image, media_type="image/png",
+                            headers={"Cache-Control":"public, max-age=1800"})
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        except Exception as exc:
+            import httpx
+            if isinstance(exc, httpx.HTTPError):
+                raise HTTPException(status_code=503, detail="WorldPop image service is currently unavailable") from exc
+            raise
 
     return app
 
