@@ -12,6 +12,7 @@ from . import geo
 from . import location
 from . import planning
 from . import open_layers
+from . import managed_layers
 from .model import Charger, Fleet, project
 
 WEB = geo.ROOT / "web"
@@ -25,9 +26,10 @@ CHARGERS = {
 def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> FastAPI:
     path = Path(db_path or os.environ.get("UEV_DB_PATH", Path.home() / ".uev" / "uev-demo.sqlite"))
     with geo.connect(path) as conn:
+        managed_layers.ensure_schema(conn)
         if seed_demo:
             geo.seed_demo(conn)
-    app = FastAPI(title="UEV Geospatial Explorer API", version="0.5.0",
+    app = FastAPI(title="UEV Geospatial Explorer API", version="0.6.0",
                   description="Exploratory GIS and demand previews with explicitly synthetic demonstration data")
     app.mount("/static", StaticFiles(directory=WEB), name="static")
 
@@ -40,7 +42,7 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
 
     @app.get("/api/v1/metadata")
     def metadata():
-        return {"version": "0.5.0", "data_status": "SYNTHETIC DEMONSTRATION ONLY",
+        return {"version": "0.6.0", "data_status": "SYNTHETIC DEMONSTRATION ONLY",
                 "baseline_year": 2026,
                 "layers": sorted(geo.LAYERS), "lenses": list(geo.WEIGHTS),
                 "disclaimer": "Coordinates and asset descriptions are invented. No station is verified, approved or grid-ready."}
@@ -148,8 +150,20 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
     @app.get("/api/v1/catalog")
     def layer_catalog():
         """Platform data inventory with real/synthetic/unavailable states."""
-        return {"layers": open_layers.CATALOG,
-                "warning": "Public OSM layers are incomplete. Live overlays are NOT automatically inputs to the UEV optimization model."}
+        with _db() as conn:
+            published=managed_layers.catalog_entries(conn)
+        return {"layers": open_layers.CATALOG+published,
+                "warning": "Admin-published layers are display-only and not verified. Public OSM layers are incomplete. Neither is automatically an input to the UEV optimization model."}
+
+    @app.get("/api/v1/managed/{ident}")
+    def published_geojson(ident: str):
+        with _db() as conn:
+            record=managed_layers.get_layer(conn,ident,published_only=True)
+        if record is None:
+            raise HTTPException(404,detail="Layer not found or not published")
+        return Response(content=__import__("json").dumps(record),
+                        media_type="application/geo+json",
+                        headers={"Cache-Control":"no-store"})
 
     @app.get("/api/v1/public/osm/{layer}")
     async def public_osm(layer: str, bbox: str):
