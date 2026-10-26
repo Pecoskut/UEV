@@ -1,0 +1,16 @@
+district,category,total_vehicles,electric_vehicles,km_per_day,kwh_per_km,growth_rate
+Kampala,Motorcycles,11000,400,80,0.045,0.025
+Kampala,Cars,4400,60,35,0.18,0.025
+Kampala,Buses,250,5,145,1.2,0.02
+Wakiso,Motorcycles,8000,120,70,0.045,0.03
+Wakiso,Cars,3700,35,32,0.18,0.03
+Wakiso,Buses,160,2,125,1.2,0.03
+Jinja,Motorcycles,4300,75,68,0.045,0.02
+Jinja,Cars,1100,9,32,0.18,0.02
+Jinja,Buses,45,3,120,1.2,0.015
+Iganga,Motorcycles,2700,30,67,0.045,0.02
+Iganga,Cars,550,5,30,0.18,0.02
+Iganga,Buses,27,2,115,1.2,0.02
+Gulu,Motorcycles,3200,25,64,0.045,0.02
+Gulu,Cars,850,7,30,0.18,0.02
+Gulu,Buses,20,1,115,1.2,0.02
