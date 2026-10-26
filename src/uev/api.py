@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import geo
+from . import location
 from .model import Charger, Fleet, project
 
 WEB = geo.ROOT / "web"
@@ -89,6 +90,31 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
         result = project(fleets, 2026, target_year, target_pct / 100, CHARGERS[technology])
         return {**result, "status": "synthetic-demonstration", "selected_district": district,
                 "warning": "Demand/cost preview only. Not a least-cost national plan or site-specific engineering analysis."}
+
+
+    @app.get("/api/v1/location/optimize")
+    def location_optimize(district: str | None = None, mode: str = "least_cost",
+                          coverage_pct: float = Query(100, ge=0, le=100),
+                          radius_km: float = Query(25, gt=0, le=1000),
+                          budget_usd: float | None = Query(None, ge=0),
+                          selected_site_ids: str = ""):
+        with _db() as conn:
+            mobility=geo.get_features(conn,"mobility",district)["features"]
+            candidates=geo.get_features(conn,"candidates",district)["features"]
+        ds=[location.Demand(f["id"],f["properties"]["name"],*f["geometry"]["coordinates"],
+                            round(float(f["properties"].get("activity_index",0))*1000,2)) for f in mobility]
+        ss=[location.Site(f["id"],f["properties"]["name"],*f["geometry"]["coordinates"],
+                          capacity_kwh_day=round(900+float(f["properties"].get("grid_readiness_index",0))*1200),
+                          capex_usd=round(25000+(1-float(f["properties"].get("grid_readiness_index",0)))*20000),
+                          eligible=geo.score_candidate(f["properties"])["eligible"]) for f in candidates]
+        try:
+            result=location.optimize(ds,ss,mode=mode,coverage_pct=coverage_pct,
+                                      radius_km=radius_km,budget_usd=budget_usd,
+                                      selected_site_ids=selected_site_ids.split(",") if selected_site_ids else None)
+            return {**result,"geojson":location.as_geojson(result),
+                    "disclaimer":"ALL inputs are SYNTHETIC demonstration data; not a certified location investment model."}
+        except ValueError as exc:
+            raise HTTPException(status_code=422,detail=str(exc)) from exc
 
     return app
 
