@@ -11,14 +11,14 @@
 <body>
 <div class="app">
   <header class="topbar">
-    <div class="brand"><div class="brand-logo">U<span>EV</span></div><div class="brand-divider"></div><div><strong>Energy & Mobility Explorer</strong><small>GEOSPATIAL PLANNING PLATFORM / VERSION 0.2</small></div></div>
-    <div class="topbar-right"><span class="label-pill"><span class="pulse"></span> Phase 2 Prototype</span><a href="/docs" target="_blank" rel="noopener">API docs ↗</a></div>
+    <div class="brand"><div class="brand-logo">U<span>EV</span></div><div class="brand-divider"></div><div><strong>Energy & Mobility Explorer</strong><small>GEOSPATIAL PLANNING PLATFORM / VERSION 0.4</small></div></div>
+    <div class="topbar-right"><span class="label-pill"><span class="pulse"></span> Integrated Planning Prototype</span><a href="/docs" target="_blank" rel="noopener">API docs ↗</a></div>
   </header>
   <div class="notice"><span class="notice-dot">!</span><b>SYNTHETIC DEMONSTRATION DATA</b><span> All station coordinates, fleet counts and grid assets are fictional. Do not use to make real investment or grid-connection decisions.</span></div>
   <main class="workspace">
     <aside class="sidebar">
       <div class="sidebar-scroll">
-      <section class="side-head"><span class="eyebrow">01 / EXPLORE</span><h1>Explore mobility.<br/><em>Plan intelligently.</em></h1><p>Inspect transport activity, charging infrastructure and candidate locations, then test an illustrative fleet electrification scenario.</p></section>
+      <section class="side-head"><span class="eyebrow">01 / EXPLORE</span><h1>Explore mobility.<br/><em>Plan intelligently.</em></h1><p>Inspect transport activity, charging infrastructure and candidate locations, then test illustrative fleet, charging-demand and station-location scenarios.</p></section>
       <section class="form-section"><div class="section-label"><span>STUDY AREA</span><span class="small-note">Uganda demonstration</span></div><label for="district">District</label><select id="district"><option value="">All demo districts</option></select></section>
       <section class="form-section"><div class="section-label"><span>MAP LAYERS</span><span class="small-note">Toggle overlays</span></div>
         <label class="toggle-row"><span><span class="layer-dot charging"></span>Example charging hubs</span><input type="checkbox" data-layer="charging" checked/></label>
@@ -30,10 +30,17 @@
         <select id="lens"><option value="balanced">Balanced suitability</option><option value="grid_ready">Grid-readiness priority</option><option value="coverage">Underserved coverage priority</option></select>
         <p class="input-note">Weights change the preliminary ranking. No grid capacity or service-area optimization is performed.</p>
       </section>
-      <section class="form-section"><div class="section-label"><span>SCENARIO PREVIEW</span><span class="small-note">Illustrative calculation</span></div>
+      <section class="form-section"><div class="section-label"><span>INTEGRATED SCENARIO</span><span class="small-note">Illustrative calculation</span></div>
         <div class="field-grid"><div><label for="year">Planning year</label><input id="year" type="number" min="2026" max="2200" step="1" value="2040"/></div><div><label for="target">Fleet target (%)</label><input id="target" type="number" min="0" max="100" step="5" value="100"/></div></div>
         <label for="technology">Charging technology</label><select id="technology"><option value="SWAP">Battery swapping</option><option value="AC">AC charging</option><option value="DC">DC charging</option></select>
-        <button id="run-model" class="primary">Run demonstration <span>↗</span></button>
+        <label for="plan-mode">Infrastructure decision mode</label>
+        <select id="plan-mode"><option value="least_cost">Lowest candidate-site CAPEX</option><option value="max_coverage">Maximum coverage within budget</option><option value="manual">Cost my preferred sites</option></select>
+        <div id="coverage-wrap"><label for="energy-coverage">Minimum charging energy served (%)</label><input id="energy-coverage" type="number" min="0" max="100" value="100" step="5"/></div>
+        <div class="field-grid"><div><label for="service-radius">Service radius (km)</label><input id="service-radius" type="number" min="1" max="1000" value="35"/></div><div><label for="modules-site">Charging units / site</label><input id="modules-site" type="number" min="1" max="100" value="48"/></div></div>
+        <div id="budget-wrap" hidden><label for="plan-budget">Maximum station investment (USD)</label><input id="plan-budget" type="number" min="0" value="1500000" step="50000"/></div>
+        <div id="manual-wrap" hidden><label for="manual-sites">Select existing candidate sites (Ctrl-click for multiple)</label><select id="manual-sites" multiple size="5" aria-label="Select candidate sites"></select></div>
+        <p class="input-note">Site capital costs and charging energy are hypothetical; service radius uses straight-line distance. Results are NOT engineering-approved.</p>
+        <button id="run-model" class="primary">Run integrated scenario <span>↗</span></button>
       </section>
       <footer class="sidebar-footer">UEV / Open-source planning foundation<br/>Prototype results are not official Uganda statistics.</footer>
       </div>
@@ -57,9 +64,12 @@
           <div class="disclaimer-small"><b>Important:</b> Site scores are not engineering feasibility, approvals, real demand forecasts or minimum-cost investments.</div>
         </section>
       </div>
-      <section class="results"><div class="results-head"><div><span class="eyebrow">03 / MODEL</span><h2>Electrification scenario preview</h2></div><span id="model-status" class="soft-badge">READY TO RUN</span></div>
-      <div class="result-cards"><div><small>Projected EV fleet</small><strong id="r-ev">—</strong></div><div><small>Annual grid electricity</small><strong id="r-energy">—</strong></div><div><small>Illustrative charging units</small><strong id="r-chargers">—</strong></div><div><small>Equipment CAPEX proxy</small><strong id="r-cost">—</strong></div></div>
-      <p class="result-note">This demand preview uses the Phase 1 model. It excludes vehicle acquisition, lifecycle costs, annual investment optimization, siting constraints and real feeder load-flow.</p></section>
+      <section class="results"><div class="results-head"><div><span class="eyebrow">03 / MODEL</span><h2>Fleet and charging-network scenario</h2></div><span id="model-status" class="soft-badge">READY TO RUN</span></div>
+      <div class="result-cards"><div><small>Projected EV fleet</small><strong id="r-ev">—</strong></div><div><small>Annual grid electricity</small><strong id="r-energy">—</strong></div><div><small>Selected charging sites</small><strong id="r-chargers">—</strong></div><div><small>Station portfolio CAPEX</small><strong id="r-cost">—</strong></div><div><small>Charging energy covered</small><strong id="r-coverage">—</strong></div><div><small>Generic charger CAPEX proxy</small><strong id="r-equip">—</strong></div></div>
+      <div class="scenario-message" id="plan-message"><strong>Ready to run</strong><p>Adjust the scenario controls to estimate projected charging demand and a feasible station network.</p></div>
+      <div class="scenario-grid"><div><h3>Selected station portfolio</h3><div id="plan-sites" class="site-list"><div class="empty">Run a scenario to see selected stations.</div></div></div>
+      <div><h3>Indicative fleet and energy trajectory</h3><div class="timeline-scroll"><table class="scenario-table"><thead><tr><th>Year</th><th>Electric vehicles</th><th>Grid MWh/year</th></tr></thead><tbody id="plan-trajectory"></tbody></table></div></div></div>
+      <div class="scenario-footer"><p class="result-note">Fleet targets and annual trajectories are scenario assumptions. Site CAPEX and generic charging-equipment CAPEX are different, overlapping proxies: <b>do not add them</b>. No official Uganda fleet or grid data is included.</p><button id="download-plan" class="download-button" disabled>Download scenario JSON</button></div></section>
     </div>
   </main>
 </div>
