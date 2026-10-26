@@ -1,0 +1,370 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "m-ka",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.59,
+          0.326
+        ]
+      },
+      "properties": {
+        "layer": "mobility",
+        "name": "Demonstration motorcycle activity \u2022 Kampala",
+        "district": "Kampala",
+        "activity_index": 0.92,
+        "note": "Illustrative cluster, not verified vehicle counts"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "m-wa",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.494,
+          0.422
+        ]
+      },
+      "properties": {
+        "layer": "mobility",
+        "name": "Demonstration mobility activity \u2022 Wakiso",
+        "district": "Wakiso",
+        "activity_index": 0.69,
+        "note": "Illustrative cluster, not verified vehicle counts"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "m-ji",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.202,
+          0.433
+        ]
+      },
+      "properties": {
+        "layer": "mobility",
+        "name": "Demonstration bus operations \u2022 Jinja",
+        "district": "Jinja",
+        "activity_index": 0.64,
+        "note": "Illustrative activity only; no actual bus operator data"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "m-ig",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.49,
+          0.603
+        ]
+      },
+      "properties": {
+        "layer": "mobility",
+        "name": "Demonstration corridor demand \u2022 Iganga",
+        "district": "Iganga",
+        "activity_index": 0.47,
+        "note": "Illustrative cluster"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "m-gu",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.295,
+          2.778
+        ]
+      },
+      "properties": {
+        "layer": "mobility",
+        "name": "Demonstration mobility activity \u2022 Gulu",
+        "district": "Gulu",
+        "activity_index": 0.46,
+        "note": "Illustrative cluster"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ch-ka",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.606,
+          0.317
+        ]
+      },
+      "properties": {
+        "layer": "charging",
+        "name": "Example existing charging hub A",
+        "district": "Kampala",
+        "technology": "battery_swapping",
+        "rated_kw": 38,
+        "condition": "synthetic"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ch-wa",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.469,
+          0.402
+        ]
+      },
+      "properties": {
+        "layer": "charging",
+        "name": "Example existing charging hub B",
+        "district": "Wakiso",
+        "technology": "ac",
+        "rated_kw": 22,
+        "condition": "synthetic"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ch-ji",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.188,
+          0.429
+        ]
+      },
+      "properties": {
+        "layer": "charging",
+        "name": "Example existing depot charger C",
+        "district": "Jinja",
+        "technology": "dc",
+        "rated_kw": 60,
+        "condition": "synthetic"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gr-ka",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.573,
+          0.32
+        ]
+      },
+      "properties": {
+        "layer": "grid",
+        "name": "Example feeder node K",
+        "district": "Kampala",
+        "nominal_kva": 1000,
+        "estimated_headroom_kw": null,
+        "note": "Fictional; no feeder rating or spare capacity verified"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gr-wa",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.479,
+          0.416
+        ]
+      },
+      "properties": {
+        "layer": "grid",
+        "name": "Example transformer node W",
+        "district": "Wakiso",
+        "nominal_kva": 500,
+        "estimated_headroom_kw": null,
+        "note": "Fictional; no feeder rating or spare capacity verified"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "gr-ji",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.213,
+          0.427
+        ]
+      },
+      "properties": {
+        "layer": "grid",
+        "name": "Example feeder node J",
+        "district": "Jinja",
+        "nominal_kva": 700,
+        "estimated_headroom_kw": null,
+        "note": "Fictional; no feeder rating or spare capacity verified"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ca-ka-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.598,
+          0.31
+        ]
+      },
+      "properties": {
+        "layer": "candidates",
+        "name": "Candidate K1 \u2022 Urban interchange",
+        "district": "Kampala",
+        "demand_index": 0.95,
+        "road_access_index": 0.98,
+        "grid_readiness_index": 0.78,
+        "underserved_index": 0.42,
+        "land_available": true,
+        "protected_area": false,
+        "note": "Invented site for testing; screening indices are synthetic and NOT utility validated"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ca-ka-2",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.552,
+          0.361
+        ]
+      },
+      "properties": {
+        "layer": "candidates",
+        "name": "Candidate K2 \u2022 Outer activity centre",
+        "district": "Kampala",
+        "demand_index": 0.78,
+        "road_access_index": 0.84,
+        "grid_readiness_index": 0.62,
+        "underserved_index": 0.77,
+        "land_available": true,
+        "protected_area": false,
+        "note": "Invented site for testing; screening indices are synthetic and NOT utility validated"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ca-wa-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.518,
+          0.399
+        ]
+      },
+      "properties": {
+        "layer": "candidates",
+        "name": "Candidate W1 \u2022 Peri-urban hub",
+        "district": "Wakiso",
+        "demand_index": 0.72,
+        "road_access_index": 0.79,
+        "grid_readiness_index": 0.86,
+        "underserved_index": 0.84,
+        "land_available": true,
+        "protected_area": false,
+        "note": "Invented site for testing; screening indices are synthetic and NOT utility validated"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ca-wa-2",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.45,
+          0.426
+        ]
+      },
+      "properties": {
+        "layer": "candidates",
+        "name": "Candidate W2 \u2022 Restricted illustration",
+        "district": "Wakiso",
+        "demand_index": 0.88,
+        "road_access_index": 0.91,
+        "grid_readiness_index": 0.75,
+        "underserved_index": 0.92,
+        "land_available": false,
+        "protected_area": false,
+        "note": "Invented site for testing; screening indices are synthetic and NOT utility validated"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ca-ji-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.22,
+          0.412
+        ]
+      },
+      "properties": {
+        "layer": "candidates",
+        "name": "Candidate J1 \u2022 Demonstration bus site",
+        "district": "Jinja",
+        "demand_index": 0.68,
+        "road_access_index": 0.89,
+        "grid_readiness_index": 0.72,
+        "underserved_index": 0.64,
+        "land_available": true,
+        "protected_area": false,
+        "note": "Invented site for testing; screening indices are synthetic and NOT utility validated"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ca-ig-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          33.475,
+          0.621
+        ]
+      },
+      "properties": {
+        "layer": "candidates",
+        "name": "Candidate I1 \u2022 Demonstration corridor site",
+        "district": "Iganga",
+        "demand_index": 0.59,
+        "road_access_index": 0.74,
+        "grid_readiness_index": 0.46,
+        "underserved_index": 0.94,
+        "land_available": true,
+        "protected_area": false,
+        "note": "Invented site for testing; screening indices are synthetic and NOT utility validated"
+      }
+    },
+    {
+      "type": "Feature",
+      "id": "ca-gu-1",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          32.31,
+          2.75
+        ]
+      },
+      "properties": {
+        "layer": "candidates",
+        "name": "Candidate G1 \u2022 Demonstration regional site",
+        "district": "Gulu",
+        "demand_index": 0.57,
+        "road_access_index": 0.79,
+        "grid_readiness_index": 0.61,
+        "underserved_index": 0.98,
+        "land_available": true,
+        "protected_area": false,
+        "note": "Invented site for testing; screening indices are synthetic and NOT utility validated"
+      }
+    }
+  ]
+}
