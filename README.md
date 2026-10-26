@@ -10,12 +10,14 @@ UEV is an open-source geospatial and techno-economic planning project for Uganda
 4. Where should charging and battery-swapping infrastructure be deployed?
 5. What investments and timelines are required for user-defined electrification targets, up to 100%?
 
-## Current release — Phase 2 geospatial prototype
+## Current development release — Phase 4 integrated prototype
 
 - **Phase 1:** baseline fleet and charging energy calculator and simplified charging CAPEX comparisons.
-- **Phase 2:** SQLite geospatial source catalogue, GeoJSON/WGS84 point data, candidate-site screening, FastAPI endpoints, MapLibre EAE-inspired web map, district selection and target-year model preview.
+- **Phase 2:** SQLite spatial inventory, source catalogue, GeoJSON, FastAPI, MapLibre explorer and district filters.
+- **Phase 3:** capacitated station location-allocation (candidate-site CAPEX, maximum service coverage for a budget, user-defined site portfolios).
+- **Phase 4:** integrated scenario workflow joining year-specific fleet energy demand to candidate-site allocation, interactive selected-site and link map overlays, annual EV/energy trajectory and downloadable JSON.
 
-**All map coordinates, fleet sizes, grid asset labels and scores in the sample database are SYNTHETIC.** This version is a software demonstration, NOT a Uganda EV census, not a validated charging-location recommendation, and not a least-cost infrastructure optimizer. Full grid engineering, actual station sizing and lifecycle investment optimization are future milestones.
+**All map coordinates, fleet sizes, grid asset labels and scores in the sample database are SYNTHETIC.** This remains a software demonstration, NOT a Uganda EV census, an engineering-approved charging-location recommendation, a national least-cost investment pathway or a grid power-flow model. Full grid engineering, actual station sizing and lifecycle investment optimization are future milestones.
 
 ## Run the interactive GIS prototype
 
@@ -37,10 +39,22 @@ Run tests: `pytest -q`.
 
 See [Phase 2 technical documentation](docs/GEOSPATIAL_PHASE2.md), [architecture](docs/ARCHITECTURE.md) and the MIT [license](LICENSE).
 
+## Current integrated workflow
+Visit the web explorer at http://127.0.0.1:8000 and configure the year, fleet transition target, technology, site modules, distance radius, and infrastructure investment mode; click **Run integrated scenario**. View the selected sites and allocation links, coverage feasibility, separate charging hardware and candidate-site costs, and year-by-year EV/energy pathway. Download full scenario JSON.
+
+API: `GET /api/v1/plans/run?district=Kampala&target_year=2030&target_pct=20&technology=SWAP&mode=least_cost&radius_km=35&modules_per_site=48`.
+
+Three alternative objectives currently supported: (1) lowest selected-site CAPEX at user-defined energy coverage, (2) maximum served energy within site budget, (3) user-selected non-least-cost station portfolio.
+
+**Scientific caution:** EV fleet penetration and fraction of charging electricity served are DIFFERENT. Site CAPEX and generic charging equipment CAPEX are overlapping alternative estimates and **must not be added**. A model can correctly return infeasible; the result does not mean EV charging demand is zero. The target-year trajectory uses linear-share interpolation, not an empirical adoption model. Only synthetic fleet, mobility, site and cost inputs are used.
+
+Detailed methodology: [integrated model](docs/INTEGRATED_PHASE4.md).
+
 ## Roadmap
 
-- **Phase 3:** verified and licensed Uganda datasets, official district polygons, spatial joins, road accessibility and network-constrained location-allocation.
-- **Phase 4:** energy network simulations, vehicle supply and replacement rates, least-cost **and alternate-cost** investment pathways across user-selected years.
-- **Phase 5:** advanced geospatial interface, stakeholder validation and deployment.
+- **Phase 5:** verified Ugandan vehicle and charging datasets, official district polygons, spatial joins, and actual road-network travel times.
+- **Phase 6:** feeder loads, transformer headroom, infrastructure reinforcement and hourly charging.
+- **Phase 7:** full least-cost and non-least-cost **multi-year** system optimization, including vehicle investments, charging assets, grid, solar, financing, OPEX and replacement.
+- **Phase 8:** national planning reports, validation, deployments and access-control for sensitive utility/operator data.
 
 Development contributions welcome. **Do not commit private utility network details, personal GPS traces or restricted operator datasets to this public repository.**

@@ -10,6 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import geo
 from . import location
+from . import planning
 from .model import Charger, Fleet, project
 
 WEB = geo.ROOT / "web"
@@ -25,7 +26,7 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
     with geo.connect(path) as conn:
         if seed_demo:
             geo.seed_demo(conn)
-    app = FastAPI(title="UEV Geospatial Explorer API", version="0.2.0",
+    app = FastAPI(title="UEV Geospatial Explorer API", version="0.4.0",
                   description="Exploratory GIS and demand previews with explicitly synthetic demonstration data")
     app.mount("/static", StaticFiles(directory=WEB), name="static")
 
@@ -38,7 +39,7 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
 
     @app.get("/api/v1/metadata")
     def metadata():
-        return {"version": "0.2.0", "data_status": "SYNTHETIC DEMONSTRATION ONLY",
+        return {"version": "0.4.0", "data_status": "SYNTHETIC DEMONSTRATION ONLY",
                 "baseline_year": 2026,
                 "layers": sorted(geo.LAYERS), "lenses": list(geo.WEIGHTS),
                 "disclaimer": "Coordinates and asset descriptions are invented. No station is verified, approved or grid-ready."}
@@ -115,6 +116,32 @@ def create_app(db_path: str | Path | None = None, seed_demo: bool = True) -> Fas
                     "disclaimer":"ALL inputs are SYNTHETIC demonstration data; not a certified location investment model."}
         except ValueError as exc:
             raise HTTPException(status_code=422,detail=str(exc)) from exc
+
+
+    @app.get("/api/v1/plans/run")
+    def run_integrated_plan(
+        district: str | None = None,
+        target_year: int = Query(2030, ge=2026, le=2200),
+        target_pct: float = Query(20, ge=0, le=100),
+        technology: str = "SWAP",
+        mode: str = "least_cost",
+        energy_coverage_pct: float = Query(100, ge=0, le=100),
+        radius_km: float = Query(35, gt=0, le=1000),
+        budget_usd: float | None = Query(None, ge=0),
+        modules_per_site: int = Query(48, ge=1, le=100),
+        selected_site_ids: str = "",
+    ):
+        """Experimental scenario integration, strictly SYNTHETIC input datasets."""
+        try:
+            with _db() as conn:
+                return planning.run_plan(
+                    conn, district=district, target_year=target_year,
+                    target_pct=target_pct, technology=technology, mode=mode,
+                    energy_coverage_pct=energy_coverage_pct, radius_km=radius_km,
+                    budget_usd=budget_usd, modules_per_site=modules_per_site,
+                    selected_site_ids=(selected_site_ids.split(",") if selected_site_ids else None))
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     return app
 
