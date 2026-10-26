@@ -12,8 +12,8 @@ The **Scenarios** tab remains functional: district, EV fleet target, planning ye
 | Population archive | Toggle georeferenced population image overlay | WorldPop / Esri archived series, through 2020 | Historical estimated data; may require internet/third-party service |
 | Population 2026 | Source link only for downloading GeoTIFF | WorldPop Global2 2026 | Source available, **not yet a live renderable tile layer** |
 | Roads | Toggle road geometry query at current map view | OpenStreetMap live | Mapped roads only; incomplete and not calibrated travel speeds |
-| Transmission | Toggle \`power=line\` geometry query | OpenStreetMap live | OSM power lines may have unknown voltage; NOT certified HV utility assets |
-| Distribution | Toggle \`power=minor_line\` geometry query | OpenStreetMap live | Often incomplete; DOES NOT represent the operator's MV/LV network |
+| Transmission | Toggle `power=line` geometry query | OpenStreetMap live | OSM power lines may have unknown voltage; NOT certified HV utility assets |
+| Distribution | Toggle `power=minor_line` geometry query | OpenStreetMap live | Often incomplete; DOES NOT represent the operator's MV/LV network |
 | Substations/transformers | Toggle mapped public nodes and substation ways | OpenStreetMap live | No spare feeder power or transformer hosting capacity |
 | Existing chargers, candidate sites, grid nodes, activity points | Toggle synthetic local GeoJSON | UEV demonstration, 2026 | Completely fictional, only for testing UI and scenario code |
 | District boundaries | Data procurement/import needed | Uganda government / UBOS | No official polygons currently bundled |
@@ -29,13 +29,13 @@ The **Scenarios** tab remains functional: district, EV fleet target, planning ye
 **Layer activation is currently visualization and exploratory inspection ONLY. It does NOT dynamically alter charging demand, grid constraints, site eligibility, facility-location objective coefficients, or investment totals.** Those computations still use the synthetic Phase 1–4 inputs. Do not infer model calibration just because a real population / distribution layer is visible.
 
 ## Launch
-\`\`\`cmd
+```cmd
 conda activate uev
-cd /d "C:\\Users\\user\\Desktop\\Personal\\Projects\\EV Uganda\\UEV-main\\UEV-main"
+cd /d "C:\Users\user\Desktop\Personal\Projects\EV Uganda\UEV-main\UEV-main"
 python -m pip install -e ".[geo,test]"
 python -m pytest -q
 python -m uvicorn uev.api:app --reload
-\`\`\`
+```
 
 Open http://127.0.0.1:8000 and choose **Layers**. Zoom into Kampala, Jinja or another district, tick **Road network** or **Transmission (OSM mapped)**, then use **Refresh public layers** when you pan. Select **Scenarios** for calculations. The application requires a working network connection to use OpenStreetMap / WorldPop remote services.
 
