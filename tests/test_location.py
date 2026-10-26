@@ -12,7 +12,7 @@ def test_max_coverage():
 def test_manual_cost():
     assert optimize(D,S,mode="manual",selected_site_ids=["s2"],radius_km=5)["site_capex_usd"]==3500
 def test_infeasible():
-    assert optimize(D,S,radius_km=.01)["status"]=="infeasible"
+    assert optimize(D,S,radius_km=.01,budget_usd=1200)["status"]=="infeasible"
 def test_invalid():
     with pytest.raises(ValueError):optimize(D,S,mode="max_coverage")
     with pytest.raises(ValueError):optimize(D,S,mode="manual",selected_site_ids=["s3"])
