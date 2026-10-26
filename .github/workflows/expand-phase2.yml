@@ -9,15 +9,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Expand tested Phase 2 source files
+      - name: Expand Phase 2 source without modifying GitHub workflows
         run: |
           set -euo pipefail
           test -f .uev-phase2.tar.gz
           tar -xzf .uev-phase2.tar.gz
+          git restore .github/workflows/tests.yml
           rm .uev-phase2.tar.gz
-          rm .github/workflows/expand-phase2.yml
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
+          git add -A -- ':!.github/workflows/*'
           git commit -m "feat: add tested Phase 2 GIS explorer, spatial catalogue and APIs"
           git push origin HEAD:feature/uev-phase-2-geospatial-explorer
