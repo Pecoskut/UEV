@@ -1,6 +1,6 @@
 "use strict";
 let storedLayers=[];
-let chosenGeoJSON=null;
+let selectedLayerFile=null;
 let adminMap=null;
 let previewLayerId=null;
 const $=id=>document.getElementById(id);
@@ -24,14 +24,31 @@ async function request(path,options={}){
   if(response.status===204)return null;
   return response.json();
 }
-async function readFile(file) {
-  if(!file || file.size>5_000_000)throw Error("Select a GeoJSON file smaller than 5 MB.");
-  const document=JSON.parse(await file.text());
-  if(document.type!=="FeatureCollection" || !Array.isArray(document.features))
-    throw Error("File must be a GeoJSON FeatureCollection.");
-  if(!document.features.length || document.features.length>5000)
-    throw Error("File must contain 1–5,000 features.");
-  return document;
+async function inspectFile(file) {
+  const extension=(file.name.split(".").pop()||"").toLowerCase();
+  if(!["geojson","json","csv","zip","gpkg"].includes(extension))
+    throw Error("Unsupported file type: "+extension+". Use GeoJSON, CSV coordinates, zipped Shapefile, or GeoPackage. GeoTIFF population rasters are not yet supported.");
+  if(!file.size || file.size>20_000_000)
+    throw Error("Input file must not be empty or exceed 20 MB.");
+  if(extension==="geojson" || extension==="json"){
+    let data;
+    try {data=JSON.parse(await file.text());}
+    catch(_) {throw Error("GeoJSON is not valid JSON. Re-export from QGIS as GeoJSON (EPSG:4326).");}
+    if(data.type==="Feature")data={type:"FeatureCollection",features:[data]};
+    if(data.type!=="FeatureCollection"||!Array.isArray(data.features))
+      throw Error("GeoJSON must contain a FeatureCollection.");
+    if(!data.features.length||data.features.length>5000)
+      throw Error("GeoJSON needs 1–5,000 features.");
+    return viewSummary(data)+". Ready to import as a private draft.";
+  }
+  if(extension==="zip")return "Zipped Shapefile selected. Include .shp, .shx, .dbf and EPSG:4326 .prj files.";
+  if(extension==="csv")return "CSV selected. A longitude and latitude column is required.";
+  return "GeoPackage selected. One EPSG:4326 vector layer is supported.";
+}
+function importFeedback(message,error=false){
+  const status=$("import-status");
+  if(status){status.textContent=message;status.className=error?"import-feedback error":"import-feedback success";}
+  toast(message,error);
 }
 function viewSummary(document){
   const kinds={};
@@ -72,33 +89,32 @@ async function loadLibrary(){
 }
 async function uploadDataset(event){
   event.preventDefault();
-  if(!chosenGeoJSON){toast("Choose and review your GeoJSON first.",true);return;}
+  const file=selectedLayerFile;
+  if(!file){importFeedback("First select a supported GIS file, then complete the metadata.",true);return;}
   const yearText=$("layer-year").value.trim();
-  const payload={
-    name:$("layer-name").value,
-    description:$("layer-description").value || "User-uploaded GIS overlay; check source before use.",
-    category:$("layer-category").value,
-    source:$("layer-source").value,
-    license:$("layer-license").value,
-    reference_year:yearText?Number(yearText):null,
-    color:$("layer-color").value,
-    geojson:chosenGeoJSON
-  };
+  const payload=new FormData();
+  payload.append("file",file,file.name);
+  payload.append("name",$("layer-name").value);
+  payload.append("description",$("layer-description").value || "User uploaded map layer, not independently verified.");
+  payload.append("category",$("layer-category").value);
+  payload.append("source",$("layer-source").value);
+  payload.append("license",$("layer-license").value);
+  payload.append("reference_year",yearText);
+  payload.append("color",$("layer-color").value);
   $("upload-button").disabled=true;
-  toast("Importing the dataset…");
-  try {
-    const result=await request("/api/admin/layers",{
-      method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(payload)
-    });
-    toast(result.name+" saved as PRIVATE draft. Preview it, then publish if appropriate.");
-    chosenGeoJSON=null;
+  importFeedback("Importing "+file.name+"…");
+  try{
+    // Browser sets multipart/form-data boundary automatically; do NOT set Content-Type.
+    const result=await request("/api/admin/files",{method:"POST",body:payload});
+    selectedLayerFile=null;
     $("layer-form").reset();
-    $("file-summary").textContent="Max 5 MB, 5,000 features. File is not selected.";
+    $("file-summary").textContent="No file selected.";
+    importFeedback(result.name+" saved as a PRIVATE draft. "+result.import_summary+". Review it before publishing.");
     await loadLibrary();
     await previewDataset(result);
-  }catch(e){toast(e.message,true);}
-  finally{$("upload-button").disabled=false;}
+  }catch(error){
+    importFeedback("Import failed: "+error.message,true);
+  }finally{$("upload-button").disabled=false;}
 }
 async function updatePublication(layer){
   if(!layer.published){
@@ -194,17 +210,18 @@ async function init(){
   $("layer-form").addEventListener("submit",uploadDataset);
   $("refresh-list").addEventListener("click",loadLibrary);
   $("geojson-file").addEventListener("change",async(event)=>{
-    chosenGeoJSON=null;
+    selectedLayerFile=null;
     const file=event.target.files?.[0];
     if(!file)return;
-    try {
-      chosenGeoJSON=await readFile(file);
-      $("file-summary").textContent=viewSummary(chosenGeoJSON);
-      if(!$("layer-name").value)$("layer-name").value=file.name.replace(/\.(geojson|json)$/i,"");
-      toast("GeoJSON parsed. Complete the metadata and import it as a private draft.");
-    }catch(e){
-      $("file-summary").textContent=e.message;
-      toast(e.message,true);
+    try{
+      const summary=await inspectFile(file);
+      selectedLayerFile=file;
+      $("file-summary").textContent=summary;
+      if(!$("layer-name").value)$("layer-name").value=file.name.replace(/\.(geojson|json|csv|zip|gpkg)$/i,"");
+      importFeedback("File recognised: "+file.name+". Add source and licence, then select Import as private draft.");
+    }catch(error){
+      $("file-summary").textContent=error.message;
+      importFeedback(error.message,true);
     }
   });
   try{await request("/api/admin/session");initMap();await loadLibrary();}
