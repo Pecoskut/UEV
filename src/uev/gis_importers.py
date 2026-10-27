@@ -63,7 +63,7 @@ def _csv(filename: str, raw: bytes) -> dict:
 def _wgs84_prj(prj: str) -> bool:
     # Do not silently pretend a national-grid projected shapefile is WGS84.
     normalized=prj.upper().replace(" ","").replace("_","")
-    return "WGS84" in normalized and ("GEOGCS[" in normalized or "GEOGCRS[" in normalized or "GEODCRS[" in normalized)
+    return ("WGS84" in normalized or "WGS1984" in normalized) and ("GEOGCS[" in normalized or "GEOGCRS[" in normalized or "GEODCRS[" in normalized)
 
 def _safe_props(values: dict) -> dict:
     result={}
