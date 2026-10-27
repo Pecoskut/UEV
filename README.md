@@ -21,6 +21,10 @@ UEV is an open-source geospatial and techno-economic planning project for Uganda
 
 **The built-in UEV demonstration asset coordinates, fleet sizes, grid labels and site scores are SYNTHETIC.** Public OpenStreetMap/WorldPop overlays are separate and not fed into optimization. This remains a software demonstration, NOT a Uganda EV census, an engineering-approved charging-location recommendation, a national least-cost investment pathway or a grid power-flow model. Full grid engineering, actual station sizing and lifecycle investment optimization are future milestones.
 
+## Importing vector GIS data (v0.6.1)
+
+The private backend imports GeoJSON, CSV coordinate tables, EPSG:4326 zipped Shapefile, and single-layer EPSG:4326 GeoPackage. Every import starts as a private draft, with clear error messages and source/licence metadata. GeoTIFF rasters require a future separate pipeline. See [GIS import troubleshooting](docs/GIS_IMPORTS_PHASE6_1.md).
+
 ## Private backend and public frontend
 
 **Two separate running web applications share one data store.** Only administrators may upload or publish layers. Public users can only explore published layers and run existing scenarios. See [Windows installation and workflows](docs/DUAL_INTERFACE_PHASE6.md) for exact commands and security cautions.

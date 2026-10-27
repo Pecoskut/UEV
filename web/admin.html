@@ -18,14 +18,14 @@
     <div class="aside-note"><strong>Access control</strong><p>Admin credentials are required. Drafts are not exposed by the public API. Only upload information you have a right to publish.</p></div>
   </aside>
   <main>
-    <header class="header"><div><span class="eyebrow">UEV / VERSION 0.6</span><h2>Geospatial dataset administration</h2></div><div class="chip">● ADMINISTRATOR</div></header>
+    <header class="header"><div><span class="eyebrow">UEV / VERSION 0.6.1</span><h2>Geospatial dataset administration</h2></div><div class="chip">● ADMINISTRATOR</div></header>
     <div class="notice">Publishing makes the full uploaded GeoJSON—including all feature attributes—available to anyone with access to the public explorer. No validation of land access, electrical ratings, privacy, or dataset licences is implied.</div>
     <div class="stats"><div><small>Stored datasets</small><strong id="count-all">—</strong></div><div><small>Published layers</small><strong id="count-published">—</strong></div><div><small>Unpublished drafts</small><strong id="count-drafts">—</strong></div></div>
     <div class="columns">
       <section class="panel">
-        <div class="panel-head"><div><span class="eyebrow">01 / INGEST</span><h3>Add a GIS layer</h3></div><span class="tag">GeoJSON / WGS84</span></div>
+        <div class="panel-head"><div><span class="eyebrow">01 / INGEST</span><h3>Add a GIS layer</h3></div><span class="tag">Vector GIS / EPSG:4326</span></div>
         <form id="layer-form">
-          <div class="drop-zone"><label for="geojson-file">Choose a .geojson or .json file</label><input type="file" id="geojson-file" accept=".geojson,.json,application/geo+json,application/json" required/><p id="file-summary">Max 5 MB and 5,000 features. Coordinates must use longitude/latitude (EPSG:4326).</p></div>
+          <div class="drop-zone"><label for="geojson-file">Choose a GIS vector file</label><input type="file" id="geojson-file" accept=".geojson,.json,.csv,.zip,.gpkg,application/geo+json,application/json" required/><p id="file-summary">GeoJSON, CSV with lon/lat columns, zipped Shapefile or single-layer GeoPackage. Max input 20 MB; output GeoJSON max 5 MB / 5,000 features. WGS84 only.</p></div>
           <label for="layer-name">Display name <em>*</em></label><input id="layer-name" required maxlength="160" placeholder="Uganda 33 kV distribution lines"/>
           <label for="layer-source">Data owner / source <em>*</em></label><input id="layer-source" required maxlength="160" placeholder="Utility / partner / open dataset"/>
           <label for="layer-license">Licence / publication permission <em>*</em></label><input id="layer-license" required maxlength="160" placeholder="Open data licence or written permission"/>
@@ -37,8 +37,8 @@
           </div>
           <label for="layer-description">Dataset description</label><textarea id="layer-description" rows="3" maxlength="2000" placeholder="Coverage, update date, limitations and field definitions"></textarea>
           <label for="layer-color">Layer colour</label><input type="color" id="layer-color" value="#2fc7c9"/>
-          <button class="primary" type="submit" id="upload-button">Import as private draft</button>
-          <p class="help">Importing never publishes automatically. Select a dataset from the library below to preview before publishing.</p>
+          <button class="primary" type="submit" id="upload-button">Import as private draft</button><p class="import-feedback" id="import-status" role="status" aria-live="polite">Choose a GIS vector file and provide the source and publication permissions.</p>
+          <p class="help">GeoTIFF rasters are not supported in this version. Importing never publishes automatically. Select a dataset from the library below to preview before publishing.</p>
         </form>
       </section>
       <section class="panel panel-preview">

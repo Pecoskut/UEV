@@ -15,12 +15,12 @@ import os
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from fastapi import FastAPI, Depends, HTTPException, Request, Response
+from fastapi import FastAPI, Depends, HTTPException, Request, Response, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.staticfiles import StaticFiles
 
-from . import geo, managed_layers
+from . import geo, managed_layers, gis_importers
 
 WEB = geo.ROOT / "web"
 basic = HTTPBasic(realm="UEV Data Manager")
@@ -65,7 +65,7 @@ def create_admin_app(db_path: str | Path | None=None):
     path=Path(db_path or os.environ.get("UEV_DB_PATH") or (Path.home()/".uev"/"uev-demo.sqlite"))
     with geo.connect(path) as conn:
         managed_layers.ensure_schema(conn)
-    app=FastAPI(title="UEV Private Data Manager",version="0.6.0",
+    app=FastAPI(title="UEV Private Data Manager",version="0.6.1",
                 description="Local privileged layer-upload and publication interface")
     app.mount("/assets",StaticFiles(directory=WEB),name="assets")
 
@@ -78,7 +78,7 @@ def create_admin_app(db_path: str | Path | None=None):
 
     @app.get("/api/admin/session")
     def admin_status(_:bool=Depends(require_admin)):
-        return {"authenticated":True,"role":"administrator","version":"0.6.0"}
+        return {"authenticated":True,"role":"administrator","version":"0.6.1"}
 
     @app.get("/api/admin/layers")
     def admin_list(_:bool=Depends(require_admin)):
@@ -100,6 +100,48 @@ def create_admin_app(db_path: str | Path | None=None):
             with _db() as conn:
                 return managed_layers.create_layer(conn,payload)
         except ValueError as exc:
+            raise HTTPException(422,detail=str(exc)) from exc
+
+
+    @app.post("/api/admin/files",status_code=201)
+    async def admin_import_file(
+        request: Request,
+        _: bool=Depends(require_admin),
+        file: UploadFile=File(...),
+        name: str=Form(...),
+        source: str=Form(...),
+        license: str=Form(...),
+        category: str=Form("Other uploaded layers"),
+        description: str=Form("User-uploaded geospatial layer"),
+        reference_year: str=Form(""),
+        color: str=Form("#2fc7c9"),
+    ):
+        """Import supported WGS84 vector formats as a PRIVATE draft.
+
+        Public visibility requires an explicit, separate publication request.
+        """
+        origin=request.headers.get("origin")
+        if origin:
+            url=urlsplit(origin)
+            if url.scheme!=request.url.scheme or url.netloc!=request.url.netloc:
+                raise HTTPException(403,"Cross-origin changes are not permitted")
+        if request.headers.get("content-length") and int(request.headers["content-length"])>gis_importers.MAX_UPLOAD_BYTES+60000:
+            raise HTTPException(413,"GIS upload is larger than 20 MB")
+        raw=await file.read(gis_importers.MAX_UPLOAD_BYTES+1)
+        if len(raw)>gis_importers.MAX_UPLOAD_BYTES:
+            raise HTTPException(413,"GIS upload is larger than 20 MB")
+        try:
+            geojson,import_summary=gis_importers.parse_uploaded_layer(file.filename or "",raw)
+            year=int(reference_year.strip()) if reference_year.strip() else None
+            payload={
+                "name":name,"source":source,"license":license,"category":category,
+                "description":description,"reference_year":year,"color":color,
+                "geojson":geojson,
+            }
+            with _db() as conn:
+                created=managed_layers.create_layer(conn,payload)
+            return {**created,"import_summary":import_summary,"original_filename":file.filename}
+        except (ValueError,TypeError) as exc:
             raise HTTPException(422,detail=str(exc)) from exc
 
     @app.put("/api/admin/layers/{ident}/publication")
